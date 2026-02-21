@@ -1,0 +1,19 @@
+{
+  "name": "WAR SAKEEB Tracker",
+  "short_name": "SalatTrack",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e2e8f0",
+  "theme_color": "#e2e8f0",
+  "description": "Premium Prayer Tracker by WAR SAKEEB.",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='115' fill='%231e293b'/%3E%3Cpath d='M288 120A144 144 0 1 0 392 384 168 168 0 1 1 288 120Z' fill='%23ffffff'/%3E%3Ccircle cx='340' cy='220' r='24' fill='%23ffffff'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
+
