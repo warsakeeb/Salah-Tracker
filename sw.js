@@ -1,70 +1,62 @@
-const CACHE_NAME = 'salat-tracker-v9';
+const CACHE_NAME = 'app-permanent-vault-v10';
 
-// Core files needed to open the app offline
+// These are the core React scripts that MUST be locked in permanently
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
   'https://unpkg.com/react@18/umd/react.production.min.js',
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-  'https://unpkg.com/@babel/standalone/babel.min.js',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap',
-  './Adhan.mp3'
+  'https://unpkg.com/@babel/standalone/babel.min.js'
 ];
 
+// 1. INSTALL PHASE: Lock the core files in immediately
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      // FAULT TOLERANT CACHING: It loads files one by one. 
-      // If Adhan.mp3 is missing, it won't crash the whole app anymore!
-      for (let asset of CORE_ASSETS) {
-        try {
-          await cache.add(asset);
-        } catch (error) {
-          console.warn('Could not cache:', asset, error);
-        }
-      }
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(CORE_ASSETS);
     })
   );
 });
 
+// 2. ACTIVATE PHASE: Clean up any old, corrupted caches
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keyList) => {
-      return Promise.all(keyList.map((key) => {
-        // Delete all old cache versions except our actual saved prayer times
-        if (key !== CACHE_NAME && !key.startsWith('salah_db')) {
-          return caches.delete(key);
-        }
-      }));
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) return caches.delete(key);
+        })
+      );
     })
   );
   return self.clients.claim();
 });
 
+// 3. THE MAGIC FIX: "Stale-While-Revalidate"
 self.addEventListener('fetch', (e) => {
-  if (!e.request.url.startsWith('http')) return;
+  // Only intercept normal GET requests
+  if (e.request.method !== 'GET') return;
 
-  // Never cache live API requests in the service worker
-  if (e.request.url.includes('api.aladhan.com') || e.request.url.includes('bigdatacloud')) {
-     return;
-  }
-
-  // Smart Network-First, Cache-Fallback
   e.respondWith(
     caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse; // Return instantly from offline vault
-      }
-      return fetch(e.request).then((networkResponse) => {
-        return caches.open(CACHE_NAME).then((cache) => {
+      
+      // Background Network Fetch
+      const fetchPromise = fetch(e.request).then((networkResponse) => {
+        // If the internet is ON, fetch the newest version and update the permanent vault
+        caches.open(CACHE_NAME).then((cache) => {
           cache.put(e.request, networkResponse.clone());
-          return networkResponse;
         });
+        return networkResponse;
       }).catch(() => {
-        // App is offline and file is not cached. Fail silently.
+        // If the internet is OFF, ignore the error silently
       });
+
+      // INSTANT OFFLINE LOAD: 
+      // If we have it in the permanent vault, return it instantly.
+      // If not, wait for the network.
+      return cachedResponse || fetchPromise;
     })
   );
 });
