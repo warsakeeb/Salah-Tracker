@@ -3,6 +3,6 @@
       "target": {
         "namespace": "android_app",
         "package_name": "io.github.warsakeeb.twa",
-        "sha256_cert_fingerprints": ["04:2A:C5:F1:54:70:91:5C:CC:98:02:1A:BC:46:14:6B:B5:C9:DB:82:6F:D1:5E:C2:C9:FF:D9:03:12:B1:EE:03"]
+        "sha256_cert_fingerprints": ["3B:58:7E:4A:D3:CF:A6:9A:E5:21:04:82:6D:EF:E5:0E:3C:2A:61:3D:F9:2C:62:CF:DB:C5:DC:6E:2B:C9:AB:36"]
       }
     }]
