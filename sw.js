@@ -1,6 +1,5 @@
-const CACHE_NAME = 'salat-titanium-vault-v11';
+const CACHE_NAME = 'war-sakeeb-hub-v1';
 
-// Core files needed to open the app offline
 const CORE_ASSETS = [
   './',
   './index.html',
@@ -9,20 +8,16 @@ const CORE_ASSETS = [
   'https://unpkg.com/react@18/umd/react.production.min.js',
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
   'https://unpkg.com/@babel/standalone/babel.min.js',
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'
+  'https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700;800;900&display=swap'
 ];
 
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
-      // Safe loop: Downloads files one by one. If one fails, it doesn't break the whole app!
+      // Fault Tolerant Shell Loading
       for (let asset of CORE_ASSETS) {
-        try {
-          await cache.add(asset);
-        } catch (error) {
-          console.warn('Could not cache asset:', asset, error);
-        }
+        try { await cache.add(asset); } catch (err) { }
       }
     })
   );
@@ -32,7 +27,8 @@ self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(keyList.map((key) => {
-        if (key !== CACHE_NAME) {
+        // DO NOT DELETE the 8MB Quran Vault or the Prayer Time database!
+        if (key !== CACHE_NAME && key !== 'quran-master-vault-v1' && !key.startsWith('salah_db')) {
           return caches.delete(key);
         }
       }));
@@ -44,12 +40,14 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   if (!e.request.url.startsWith('http')) return;
 
-  // Do not cache live API requests here. The React App handles that.
-  if (e.request.url.includes('api.aladhan.com') || e.request.url.includes('bigdatacloud')) {
+  // Let React handle all API requests and massive DB downloads securely.
+  if (e.request.url.includes('api.aladhan.com') || 
+      e.request.url.includes('bigdatacloud') || 
+      e.request.url.includes('api.alquran.cloud')) {
      return;
   }
 
-  // Network First, Cache Fallback strategy
+  // Network First, Cache Fallback for the Shell
   e.respondWith(
     fetch(e.request).then((networkResponse) => {
       return caches.open(CACHE_NAME).then((cache) => {
