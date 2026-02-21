@@ -3,329 +3,181 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>WAR SAKEEB Tracker</title>
+  <title>WAR SAKEEB Hub</title>
   
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#f8fafc">
+  <meta name="theme-color" content="#ffffff">
   
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Amiri+Quran&family=Inter:wght@400;500;600;700;800&display=swap');
     
     :root {
-      --bg-top: #f8fafc;
-      --bg-bottom: #e2e8f0;
-      --card-bg: #ffffff;
-      --grid-bg: #f8fafc;
-      --text-main: #0f172a;
+      --bg-light: #ffffff;
+      --card-bg: #f8fafc;
+      /* Softer Text Colors */
+      --text-main: #1e293b; 
       --text-muted: #64748b;
       
-      /* Active Colors (Premium Indigo) */
-      --active-bg: #eef2ff;
-      --active-text: #4338ca;
-      --active-border: #c7d2fe;
+      /* Softer Primary Colors */
+      --salah-primary: #4f46e5;
+      --salah-light: #f5f3ff;
+      --salah-border: rgba(79, 70, 229, 0.15);
       
-      /* Badges */
-      --badge-sehri-bg: #e0f2fe;
-      --badge-sehri-txt: #0284c7;
-      --badge-iftar-bg: #fce7f3;
-      --badge-iftar-txt: #db2777;
-      --badge-last3rd-bg: #f3e8ff;
-      --badge-last3rd-txt: #7e22ce;
-      
-      --shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+      --quran-primary: #059669;
+      --quran-light: #ecfdf5;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
-      background: linear-gradient(135deg, var(--bg-top) 0%, var(--bg-bottom) 100%);
-      color: var(--text-main);
-      font-family: 'Inter', sans-serif;
-      min-height: 100vh;
-      -webkit-tap-highlight-color: transparent;
-      display: flex;
-      justify-content: center;
-      padding: 40px 20px;
-      overflow-x: hidden;
+      margin: 0; padding: 0; font-family: 'Inter', sans-serif;
+      -webkit-tap-highlight-color: transparent; overflow-x: hidden;
+      background-color: var(--bg-light); color: var(--text-main);
+      overscroll-behavior-y: none;
     }
 
-    /* --- PREMIUM MOTION GRAPHICS --- */
-    @keyframes fadeSlideUp { 
-      0% { opacity: 0; transform: translateY(40px) scale(0.98); } 
-      100% { opacity: 1; transform: translateY(0) scale(1); } 
-    }
-    @keyframes popIn { 
-      0% { opacity: 0; transform: scale(0.95); } 
-      100% { opacity: 1; transform: scale(1); } 
-    }
-    @keyframes pulseDot { 
-      0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 
-      70% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 
-      100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } 
-    }
-    @keyframes smoothBreathing {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-8px); }
-    }
-    @keyframes activeCardPulse {
-      0%, 100% { box-shadow: 0 4px 15px rgba(67, 56, 202, 0.05); transform: scale(1.02); }
-      50% { box-shadow: 0 12px 25px rgba(67, 56, 202, 0.15); transform: scale(1.03); }
-    }
-    @keyframes titleSlideFade {
-      0% { opacity: 0; transform: translateX(-30px); letter-spacing: 0px; }
-      100% { opacity: 1; transform: translateX(0); letter-spacing: 5px; }
-    }
+    .font-arabic { font-family: 'Amiri Quran', serif; line-height: 2.2; }
 
-    /* --- WIDGET CONTAINER --- */
-    .widget-container {
-      width: 100%;
-      max-width: 420px;
-      animation: smoothBreathing 6s ease-in-out infinite;
-      will-change: transform;
-    }
-
-    /* --- HEADER --- */
-    .header-section {
-      text-align: center;
-      margin-bottom: 24px;
-    }
-    .brand-title {
-      font-size: 26px;
-      font-weight: 900;
-      color: var(--text-main);
-      text-transform: uppercase;
-      margin-bottom: 8px;
-      text-shadow: 0 4px 10px rgba(0,0,0,0.05);
-      opacity: 0;
-      animation: titleSlideFade 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    }
-    .date-text {
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 2px;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      margin-bottom: 6px;
-      opacity: 0;
-      animation: popIn 0.8s ease-out 0.3s forwards;
-    }
-    .location-status {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #4f46e5;
-      cursor: pointer;
-      transition: 0.2s;
-      opacity: 0;
-      animation: popIn 0.8s ease-out 0.4s forwards;
-    }
-    .location-status:active { transform: scale(0.95); }
-
-    /* --- MAIN CARD --- */
-    .main-card {
-      background: var(--card-bg);
-      border-radius: 40px;
-      padding: 36px 24px 24px 24px;
-      box-shadow: var(--shadow);
-      position: relative;
-      opacity: 0;
-      animation: fadeSlideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-      will-change: transform, opacity;
-    }
-
-    /* Mute / Adhan Audio Button */
-    .mute-btn {
-      position: absolute;
-      top: 24px;
-      right: 24px;
-      width: 38px;
-      height: 38px;
-      background: #f1f5f9;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #ef4444;
-      cursor: pointer;
-      transition: all 0.3s;
-      z-index: 10;
-    }
-    .mute-btn:active { transform: scale(0.85); background: #e2e8f0; }
-    .mute-btn.active-bell { color: #4338ca; background: #e0e7ff; }
-
-    /* --- PERFECTLY ALIGNED CLOCK --- */
-    .clock-container {
-      text-align: center;
-      margin-bottom: 24px;
-      display: flex;
-      justify-content: center;
-      align-items: baseline; 
-      padding-top: 10px;
-    }
-    .time-numbers {
-      font-size: 52px;
-      font-weight: 800;
-      letter-spacing: -1px;
-      color: var(--text-main);
-      font-variant-numeric: tabular-nums;
-      line-height: 1;
-    }
-    .time-ampm {
-      font-size: 16px;
-      font-weight: 800;
-      color: var(--text-main);
-      margin-left: 6px;
-    }
-
-    /* --- NEXT PRAYER PILL --- */
-    .next-prayer-pill {
-      background: #f8fafc;
-      border: 1px solid #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      padding: 12px 24px;
-      border-radius: 30px;
-      margin: 0 auto 36px auto;
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-main);
-      width: max-content;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
-    }
-    .live-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: #ef4444;
-      animation: pulseDot 2s infinite;
-    }
-
-    /* --- PRAYER GRID --- */
-    .prayer-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-bottom: 14px;
-    }
-
-    .prayer-card {
-      background: var(--grid-bg);
-      border-radius: 24px;
-      padding: 16px 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      border: 1px solid transparent;
-      opacity: 0;
-      animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-    
-    .prayer-card.active {
-      background: var(--active-bg);
-      border: 1px solid var(--active-border);
-      animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards, activeCardPulse 3s infinite ease-in-out;
-    }
-
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .prayer-icon {
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-    }
-    .prayer-icon.orange { color: #f59e0b; }
-    .active .prayer-icon { color: var(--active-text); }
-    
-    .prayer-name {
-      font-size: 14px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-    .active .prayer-name { color: var(--active-text); font-weight: 800; }
-
-    /* Custom Badges */
-    .badge {
-      font-size: 8px;
-      font-weight: 800;
-      padding: 3px 6px;
-      border-radius: 6px;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-      margin-left: auto;
-    }
-    .badge-sehri { background: var(--badge-sehri-bg); color: var(--badge-sehri-txt); }
-    .badge-iftar { background: var(--badge-iftar-bg); color: var(--badge-iftar-txt); }
-    .badge-last3rd { background: var(--badge-last3rd-bg); color: var(--badge-last3rd-txt); }
-
-    .prayer-time {
-      font-size: 22px;
-      font-weight: 800;
-      color: var(--text-main);
-      display: flex;
-      align-items: baseline;
-      gap: 4px;
-      letter-spacing: -0.5px;
-    }
-    .active .prayer-time { color: var(--active-text); }
-    
-    .prayer-ampm {
-      font-size: 13px;
-      font-weight: 700;
-      color: var(--text-muted);
-    }
-    .active .prayer-ampm { color: var(--active-text); opacity: 0.8; }
-
-    /* --- TAHAJJUD FULL ROW --- */
-    .tahajjud-row {
-      background: var(--grid-bg);
-      border-radius: 24px;
-      padding: 18px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      opacity: 0;
-      animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-      transition: all 0.4s;
-    }
-    .tahajjud-row.active {
-      background: var(--active-bg);
-      border: 1px solid var(--active-border);
-      animation: fadeSlideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards, activeCardPulse 3s infinite ease-in-out;
-    }
-    .tahajjud-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    /* Loader Overlay */
-    .loader-screen {
-      position: fixed; inset: 0; background: var(--bg-top);
-      display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 999;
-    }
-    .spinner { width: 44px; height: 44px; border: 4px solid #cbd5e1; border-top: 4px solid #4f46e5; border-radius: 50%; animation: spin 1s linear infinite; }
+    /* --- SOFT NATIVE ANIMATIONS --- */
+    @keyframes slideInRight { from { opacity: 0; transform: translateX(20px) translateZ(0); } to { opacity: 1; transform: translateX(0) translateZ(0); } }
+    @keyframes slideUpFade { from { opacity: 0; transform: translateY(20px) translateZ(0); } to { opacity: 1; transform: translateY(0) translateZ(0); } }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.96) translateZ(0); } to { opacity: 1; transform: scale(1) translateZ(0); } }
     @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes pulseDot { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.3); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    @keyframes ambientBG { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+    /* --- FULL SCREEN APP ROOT --- */
+    .app-root {
+      min-height: 100vh; width: 100vw;
+      padding-top: max(30px, env(safe-area-inset-top)); 
+      padding-bottom: calc(100px + env(safe-area-inset-bottom));
+      transition: background 0.8s ease-in-out;
+      background-size: 200% 200%;
+      animation: ambientBG 20s ease infinite;
+    }
+    /* Subtler Gradients */
+    .salah-theme { background-image: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #eef2ff 100%); }
+    .quran-theme { background-image: linear-gradient(135deg, #ffffff 0%, #f8fafc 50%, #ecfdf5 100%); }
+    
+    .native-container { width: 100%; max-width: 600px; margin: 0 auto; padding: 0 24px; }
+
+    /* --- SOFT NATIVE HEADERS --- */
+    .native-header { margin-bottom: 24px; animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .native-title { font-size: 32px; font-weight: 800; letter-spacing: -0.5px; color: var(--text-main); margin-bottom: 6px; line-height: 1.1; display: flex; justify-content: space-between; align-items: center;}
+    .native-subtitle { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
+
+    .btn-press { transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s; cursor: pointer; }
+    .btn-press:active { transform: scale(0.95); opacity: 0.8; }
+
+    /* --- SALAH TRACKER --- */
+    .clock-widget {
+      text-align: center; margin-bottom: 30px; padding: 24px 20px;
+      background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+      border-radius: 36px; box-shadow: 0 15px 35px rgba(0,0,0,0.02); border: 1px solid rgba(255,255,255,0.9);
+      animation: slideUpFade 0.6s forwards; position: relative;
+    }
+    
+    /* Re-added soft background to mute button */
+    .s-mute-btn {
+      position: absolute; top: 20px; right: 20px; width: 36px; height: 36px;
+      background: rgba(0,0,0,0.03); border-radius: 50%;
+      display: flex; justify-content: center; align-items: center;
+      color: #ef4444; z-index: 10; transition: 0.3s;
+    }
+    .s-mute-btn.active-bell { color: var(--salah-primary); background: rgba(79, 70, 229, 0.08); }
+
+    .clock-time { font-size: 60px; font-weight: 800; letter-spacing: -2px; line-height: 1; color: var(--text-main); font-variant-numeric: tabular-nums; display: flex; justify-content: center; align-items: baseline; }
+    .clock-ampm { font-size: 18px; font-weight: 700; margin-left: 8px; color: var(--text-muted); }
+    .clock-sec { font-size: 26px; color: var(--salah-primary); margin-left: 4px; opacity: 0.8;}
+    
+    /* Soft Glass Pill (No more black) */
+    .pill-next { 
+      background: rgba(255, 255, 255, 0.9); color: var(--text-main); 
+      display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; 
+      border-radius: 30px; font-size: 13px; font-weight: 700; margin-top: 20px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02);
+    }
+    .pill-dot { width: 8px; height: 8px; border-radius: 50%; background-color: #ef4444; animation: pulseDot 2s infinite; }
+
+    .s-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .s-card { background: var(--card-bg); border-radius: 26px; padding: 18px; display: flex; flex-direction: column; gap: 10px; border: 1px solid transparent; opacity: 0; animation: slideUpFade 0.5s forwards; }
+    
+    /* Softer Active Glow */
+    .s-card.active { 
+      background: var(--salah-light); border-color: var(--salah-border); 
+      box-shadow: 0 8px 20px rgba(79, 70, 229, 0.06); transform: translateY(-2px); 
+    }
+    
+    .s-card-head { display: flex; align-items: center; gap: 8px; }
+    .s-icon { color: var(--text-muted); } .s-icon.orange { color: #f59e0b; } .active .s-icon { color: var(--salah-primary); }
+    .s-name { font-size: 14px; font-weight: 700; color: var(--text-muted); } .active .s-name { color: var(--text-main); font-weight: 800;}
+    .s-ptime { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.5px; display: flex; align-items: baseline; gap: 4px; } .active .s-ptime { color: var(--salah-primary); }
+    .s-pampm { font-size: 12px; font-weight: 700; color: var(--text-muted); }
+    
+    .badge { font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 8px; margin-left: auto; letter-spacing: 0.5px; }
+    .bg-sehri { background: #e0f2fe; color: #0369a1; } .bg-iftar { background: #fce7f3; color: #be185d; } .bg-last3 { background: #f3e8ff; color: #6b21a8; }
+    
+    .s-tahajjud { background: var(--card-bg); border-radius: 26px; padding: 20px 22px; display: flex; justify-content: space-between; align-items: center; opacity: 0; animation: slideUpFade 0.5s forwards; }
+    .s-tahajjud.active { background: var(--salah-light); border-color: var(--salah-border); box-shadow: 0 8px 20px rgba(79, 70, 229, 0.06); transform: translateY(-2px);}
+    .t-left { display: flex; align-items: center; gap: 10px; }
+
+    /* --- QURAN READER --- */
+    .q-search { background: var(--card-bg); border-radius: 20px; padding: 16px 20px; display: flex; align-items: center; gap: 12px; margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.02); transition: 0.3s; animation: popIn 0.6s forwards;}
+    .q-search:focus-within { border-color: var(--quran-primary); background: white; box-shadow: 0 8px 25px rgba(5, 150, 105, 0.08); }
+    .q-input { border: none; background: transparent; width: 100%; font-size: 16px; font-weight: 600; color: var(--text-main); outline: none; }
+    .q-input::placeholder { color: var(--text-muted); font-weight: 500; }
+    
+    .q-list { display: flex; flex-direction: column; gap: 12px; }
+    .q-list-item { background: var(--card-bg); border-radius: 24px; padding: 18px 20px; display: flex; align-items: center; justify-content: space-between; opacity: 0; animation: slideInRight 0.4s forwards; border: 1px solid rgba(0,0,0,0.01);}
+    .q-list-left { display: flex; align-items: center; gap: 16px; }
+    .q-num { width: 42px; height: 42px; border-radius: 14px; background: #e2e8f0; color: var(--text-muted); font-weight: 800; font-size: 14px; display: flex; justify-content: center; align-items: center; }
+    .q-name-en { font-size: 16px; font-weight: 800; color: var(--text-main); }
+    .q-meta { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
+    .q-name-ar { font-size: 22px; color: var(--quran-primary); font-weight: bold; }
+
+    .reader-view { padding-top: max(10px, env(safe-area-inset-top)); padding-bottom: 40px; animation: slideUpFade 0.4s forwards;}
+    .reader-head { position: sticky; top: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: 16px 24px; margin: -20px -24px 24px -24px; z-index: 100; border-bottom: 1px solid rgba(0,0,0,0.03); display: flex; justify-content: space-between; align-items: center;}
+    .back-btn { background: #f1f5f9; border: none; padding: 10px 14px; border-radius: 16px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 6px; }
+    .bismillah { text-align: center; font-size: 36px; color: var(--quran-primary); margin: 30px 0 40px 0; }
+    .ayah-card { margin-bottom: 30px; padding-bottom: 30px; border-bottom: 1px solid rgba(0,0,0,0.03);}
+    .ayah-ar { font-size: 34px; color: #022c22; text-align: right; margin-bottom: 24px; direction: rtl; line-height: 1.8; }
+    .ayah-en { font-size: 17px; color: #334155; line-height: 1.7; font-weight: 500; }
+    .ayah-num { background: var(--card-bg); color: var(--quran-primary); padding: 6px 12px; border-radius: 12px; font-weight: 800; font-size: 13px; margin-bottom: 16px; display: inline-block; border: 1px solid #e2e8f0;}
+
+    .sync-btn { width: 100%; background: var(--quran-primary); color: white; border: none; padding: 16px; border-radius: 20px; font-weight: 800; font-size: 15px; margin-bottom: 24px; display: flex; justify-content: center; align-items: center; gap: 10px; box-shadow: 0 8px 25px rgba(5, 150, 105, 0.25); animation: popIn 0.5s; }
+
+    /* --- NATIVE EDGE-TO-EDGE BOTTOM NAV --- */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+      display: flex; justify-content: space-around; 
+      padding: 14px 20px; padding-bottom: calc(14px + env(safe-area-inset-bottom));
+      box-shadow: 0 -10px 40px rgba(0,0,0,0.04); z-index: 1000; border-top: 1px solid rgba(0,0,0,0.03);
+      transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bottom-nav.hidden { transform: translateY(150%); } 
+
+    .nav-item {
+      display: flex; flex-direction: column; align-items: center; gap: 6px;
+      color: #94a3b8; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+      transition: all 0.3s; opacity: 0.6; padding: 8px 24px; border-radius: 20px;
+    }
+    .nav-item.active { opacity: 1; background: var(--card-bg); transform: translateY(-2px); font-weight: 800;}
+    .nav-item.active.salah { color: var(--salah-primary); }
+    .nav-item.active.quran { color: var(--quran-primary); }
+
+    .loader-screen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 40vh; }
+    .spinner { width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top: 4px solid var(--text-main); border-radius: 50%; animation: spin 1s linear infinite; }
 
   </style>
 </head>
 <body>
 
-  <!-- Hidden Audio Player -->
   <audio id="adhan-player" src="./Adhan.mp3" preload="auto" style="display:none;"></audio>
-
   <div id="root"></div>
 
   <script>
@@ -335,134 +187,98 @@
   </script>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+    const { useState, useEffect, useRef, useMemo } = React;
 
     const Icons = {
-      Moon: () => <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>,
-      Sun: () => <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
-      Pin: () => <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>,
+      Moon: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>,
+      Sun: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>,
+      Pin: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 0 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>,
       BellSlash: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13.73 21a2 2 0 0 1-3.46 0"></path><path d="M18.63 13A17.89 17.89 0 0 1 18 8"></path><path d="M6.26 6.26A5.86 5.86 0 0 0 6 8c0 7-3 9-3 9h14"></path><path d="M18 8a6 6 0 0 0-9.33-5"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>,
       Bell: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h14s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>,
-      ActiveDot: () => <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"></circle></svg>
+      ActiveDot: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"></circle></svg>,
+      Book: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>,
+      Search: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>,
+      ChevronLeft: () => <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>,
+      Download: () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>,
+      Mosque: () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2v2"/><path d="M12 8a2 2 0 0 0-2 2v4a2 2 0 0 0 4 0v-4a2 2 0 0 0-2-2Z"/><path d="M22 22H2"/><path d="M5 22v-6a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v6"/><path d="M15 22v-6a2 2 0 0 1 2-2h0a2 2 0 0 1 2 2v6"/><path d="M12 14v8"/></svg>
     };
 
+    // ==========================================
+    // MODULE 1: SALAH TRACKER (NATIVE UI)
+    // ==========================================
     const GRID_PRAYERS = [
-      { id: 'Fajr', name: 'Fajr', icon: Icons.Moon, badge: 'SEHRI ENDS', badgeClass: 'badge-sehri', api: 'Fajr' },
+      { id: 'Fajr', name: 'Fajr', icon: Icons.Moon, badge: 'SEHRI ENDS', badgeClass: 'bg-sehri', api: 'Fajr' },
       { id: 'Sunrise', name: 'Sunrise', icon: Icons.Sun, badge: null, badgeClass: '', api: 'Sunrise' },
       { id: 'Dhuhr', name: 'Dhuhr', icon: Icons.ActiveDot, badge: null, badgeClass: '', api: 'Dhuhr' },
       { id: 'Asr', name: 'Asr', icon: Icons.Sun, badge: null, badgeClass: '', api: 'Asr' },
-      { id: 'Maghrib', name: 'Maghrib', icon: Icons.Moon, badge: 'IFTAR', badgeClass: 'badge-iftar', api: 'Maghrib' },
+      { id: 'Maghrib', name: 'Maghrib', icon: Icons.Moon, badge: 'IFTAR', badgeClass: 'bg-iftar', api: 'Maghrib' },
       { id: 'Isha', name: 'Isha', icon: Icons.Moon, badge: null, badgeClass: '', api: 'Isha' }
     ];
 
-    function App() {
+    function SalahTracker() {
       const [currentTime, setCurrentTime] = useState(new Date());
       const [prayerTimes, setPrayerTimes] = useState(null);
-      const [locationName, setLocationName] = useState('Fetching Location...');
-      const [isOffline, setIsOffline] = useState(!navigator.onLine);
+      const [locationName, setLocationName] = useState('Fetching...');
       const [isMuted, setIsMuted] = useState(true);
-      const [storageLocked, setStorageLocked] = useState(false); // NEW: The Titanium Lock Status
-
       const lastPlayedPrayer = useRef(null);
 
-      // --- THE TITANIUM VAULT LOCK ---
-      // This forces Android to stop deleting the data
       useEffect(() => {
-        async function lockStorage() {
-          if (navigator.storage && navigator.storage.persist) {
-            let persisted = await navigator.storage.persisted();
-            if (!persisted) {
-              persisted = await navigator.storage.persist();
-            }
-            setStorageLocked(persisted);
-            console.log(persisted ? "OS Locked: Data is permanent." : "OS refused lock.");
-          }
-        }
-        lockStorage();
+        if (navigator.storage && navigator.storage.persist) navigator.storage.persist();
       }, []);
 
-      // Smooth 90fps clock tick & Adhan Logic
       useEffect(() => {
         const audioEl = document.getElementById('adhan-player');
         let animationFrameId;
-        
         const tick = () => {
-          const now = new Date();
-          setCurrentTime(now);
-          
+          const now = new Date(); setCurrentTime(now);
           if (prayerTimes && !isMuted && audioEl) {
             const current24Str = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
-            const adhanPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
-            
-            const activeAdhanPrayer = adhanPrayers.find(key => {
-                if(!prayerTimes[key]) return false;
-                return prayerTimes[key].split(' ')[0] === current24Str;
-            });
-
+            const activeAdhanPrayer = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'].find(key => prayerTimes[key]?.split(' ')[0] === current24Str);
             if (activeAdhanPrayer && lastPlayedPrayer.current !== activeAdhanPrayer) {
-                audioEl.currentTime = 0;
-                audioEl.play().catch(e => console.log("Audio blocked by browser."));
-                lastPlayedPrayer.current = activeAdhanPrayer;
-            } else if (!activeAdhanPrayer) {
-                lastPlayedPrayer.current = null;
-            }
+                audioEl.currentTime = 0; audioEl.play().catch(e => {}); lastPlayedPrayer.current = activeAdhanPrayer;
+            } else if (!activeAdhanPrayer) lastPlayedPrayer.current = null;
           }
-
           animationFrameId = requestAnimationFrame(tick);
         };
         animationFrameId = requestAnimationFrame(tick);
         return () => cancelAnimationFrame(animationFrameId);
       }, [prayerTimes, isMuted]);
 
-      // Init and network tracking
       useEffect(() => {
-        const savedLoc = localStorage.getItem('salah_city_v6');
+        const savedLoc = localStorage.getItem('hub_city');
         if (savedLoc) setLocationName(savedLoc);
-        initData();
-        
-        window.addEventListener('online', () => setIsOffline(false));
-        window.addEventListener('offline', () => setIsOffline(true));
-      }, []);
-
-      const initData = async () => {
-        let coordsStr = localStorage.getItem('salah_coords_v6');
+        let coordsStr = localStorage.getItem('hub_coords');
         if (!coordsStr) {
            coordsStr = JSON.stringify({lat: 28.6139, lng: 77.2090});
-           localStorage.setItem('salah_coords_v6', coordsStr);
+           localStorage.setItem('hub_coords', coordsStr);
         }
-        await loadTimesForDate(new Date(), JSON.parse(coordsStr));
-      };
+        loadTimesForDate(new Date(), JSON.parse(coordsStr));
+      }, []);
 
       const requestLocation = () => {
-        if (!navigator.geolocation) return alert("Geolocation not supported");
+        if (!navigator.geolocation) return;
         setLocationName("Locating...");
         navigator.geolocation.getCurrentPosition(async (pos) => {
           const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-          localStorage.setItem('salah_coords_v6', JSON.stringify(coords));
+          localStorage.setItem('hub_coords', JSON.stringify(coords));
           try {
             const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coords.lat}&longitude=${coords.lng}&localityLanguage=en`);
             const data = await res.json();
-            const city = data.city || data.locality || "My Location";
-            setLocationName(city);
-            localStorage.setItem('salah_city_v6', city);
+            setLocationName(data.city || data.locality || "Location Saved");
+            localStorage.setItem('hub_city', data.city || data.locality || "Location Saved");
           } catch(e) { setLocationName("Location Saved"); }
-          await loadTimesForDate(new Date(), coords);
+          loadTimesForDate(new Date(), coords);
         }, () => setLocationName("Location Denied"));
       };
 
       const loadTimesForDate = async (date, coords) => {
-        const month = date.getMonth() + 1;
-        const year = date.getFullYear();
-        const d = date.getDate().toString().padStart(2, '0');
-        const m = month.toString().padStart(2, '0');
-        const apiDate = `${d}-${m}-${year}`;
-        
+        const month = date.getMonth() + 1, year = date.getFullYear();
+        const apiDate = `${date.getDate().toString().padStart(2, '0')}-${month.toString().padStart(2, '0')}-${year}`;
         const cacheKey = `salah_db_${year}_${month}_${coords.lat.toFixed(1)}`;
         let monthData = localStorage.getItem(cacheKey);
 
         if (monthData) {
-          const parsed = JSON.parse(monthData);
-          const dayData = parsed.find(day => day.date.gregorian.date === apiDate);
+          const dayData = JSON.parse(monthData).find(day => day.date.gregorian.date === apiDate);
           if (dayData) setPrayerTimes(dayData.timings);
         } else {
           if(!navigator.onLine) return;
@@ -476,168 +292,242 @@
         }
       };
 
-      // Format Helpers
+      const getObj = (time24) => {
+        if(!time24) return new Date(0);
+        const [h, m] = time24.split(' ')[0].split(':');
+        const d = new Date(); d.setHours(parseInt(h,10), parseInt(m,10), 0, 0); return d;
+      };
+
       const formatTime = (time24) => {
         if(!time24) return { time: "--:--", ampm: "" };
-        let [hour, min] = time24.split(' ')[0].split(':');
-        let h = parseInt(hour, 10);
-        const ampm = h >= 12 ? 'PM' : 'AM';
-        h = h % 12 || 12;
-        return { time: `${h}:${min}`, ampm };
+        let [h, m] = time24.split(' ')[0].split(':'); h = parseInt(h, 10);
+        return { time: `${h % 12 || 12}:${m}`, ampm: h >= 12 ? 'PM' : 'AM' };
       };
 
-      const getPrayerDateObj = (time24) => {
-        if(!time24) return new Date(0);
-        const [hour, min] = time24.split(' ')[0].split(':');
-        const d = new Date();
-        d.setHours(parseInt(hour, 10), parseInt(min, 10), 0, 0);
-        return d;
-      };
-
-      // Math for Next Prayer
-      let nextPrayerName = "Loading...";
-      let countdownStr = "00:00:00";
-      let activePrayerId = null;
-
+      let nextName = "...", countdownStr = "00:00", activeId = null;
       if (prayerTimes) {
-        const schedule = [
-          { id: 'Fajr', date: getPrayerDateObj(prayerTimes.Fajr) },
-          { id: 'Sunrise', date: getPrayerDateObj(prayerTimes.Sunrise) },
-          { id: 'Dhuhr', date: getPrayerDateObj(prayerTimes.Dhuhr) },
-          { id: 'Asr', date: getPrayerDateObj(prayerTimes.Asr) },
-          { id: 'Maghrib', date: getPrayerDateObj(prayerTimes.Maghrib) },
-          { id: 'Isha', date: getPrayerDateObj(prayerTimes.Isha) },
-          { id: 'Tahajjud', date: getPrayerDateObj(prayerTimes.Midnight) }
+        const sched = [
+          { id: 'Fajr', d: getObj(prayerTimes.Fajr) }, { id: 'Sunrise', d: getObj(prayerTimes.Sunrise) },
+          { id: 'Dhuhr', d: getObj(prayerTimes.Dhuhr) }, { id: 'Asr', d: getObj(prayerTimes.Asr) },
+          { id: 'Maghrib', d: getObj(prayerTimes.Maghrib) }, { id: 'Isha', d: getObj(prayerTimes.Isha) },
+          { id: 'Tahajjud', d: getObj(prayerTimes.Midnight) }
         ];
-
-        let next = schedule.find(p => p.date > currentTime);
+        let next = sched.find(p => p.d > currentTime);
+        if (!next) { let f = getObj(prayerTimes.Fajr); f.setDate(f.getDate() + 1); next = { id: 'Fajr', d: f }; }
         
-        if (!next) {
-          let tomorrowFajr = getPrayerDateObj(prayerTimes.Fajr);
-          tomorrowFajr.setDate(tomorrowFajr.getDate() + 1);
-          next = { id: 'Fajr', date: tomorrowFajr };
-        }
-
-        activePrayerId = next.id;
-        nextPrayerName = next.id === 'Tahajjud' ? 'Tahajjud' : next.id;
-
-        const diffMs = next.date - currentTime;
-        if(diffMs > 0) {
-          const h = Math.floor(diffMs / 3600000).toString().padStart(2, '0');
-          const m = Math.floor((diffMs % 3600000) / 60000).toString().padStart(2, '0');
-          const s = Math.floor((diffMs % 60000) / 1000).toString().padStart(2, '0');
-          countdownStr = `${h}:${m}:${s}`;
-        }
+        activeId = next.id; nextName = next.id;
+        const diff = next.d - currentTime;
+        if(diff > 0) countdownStr = `${Math.floor(diff/3600000).toString().padStart(2,'0')}:${Math.floor((diff%3600000)/60000).toString().padStart(2,'0')}:${Math.floor((diff%60000)/1000).toString().padStart(2,'0')}`;
       }
 
-      // Main Clock formatting
-      let currentH = currentTime.getHours();
-      const currentAmPm = currentH >= 12 ? 'PM' : 'AM';
-      const displayH = (currentH % 12 || 12).toString();
-      const currentM = currentTime.getMinutes().toString().padStart(2, '0');
-      const currentS = currentTime.getSeconds().toString().padStart(2, '0');
+      let cH = currentTime.getHours(), cM = currentTime.getMinutes().toString().padStart(2, '0'), cS = currentTime.getSeconds().toString().padStart(2, '0');
+      const dateStr = currentTime.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }).toUpperCase();
 
-      const dateOptions = { weekday: 'long', month: 'long', day: 'numeric' };
-      const fullDateStr = currentTime.toLocaleDateString('en-US', dateOptions).toUpperCase();
-
-      if (!prayerTimes) {
-        return (
-          <div className="loader-screen">
-            <div className="spinner"></div>
-          </div>
-        );
-      }
+      if (!prayerTimes) return <div className="loader-screen"><div className="spinner"></div></div>;
 
       return (
-        <div className="widget-container">
+        <div className="native-container">
           
-          <div className="header-section">
-            <div className="brand-title">WAR SAKEEB</div>
-            <div className="date-text">{fullDateStr}</div>
-            
-            {/* Location Status now includes the Titanium Lock icon 🔒 if safe */}
-            <div className="location-status" onClick={requestLocation}>
-              <span style={{color: '#ef4444'}}><Icons.Pin /></span>
-              {locationName} 
-              {isOffline ? ' (Offline)' : ''} 
-              {storageLocked ? ' 🔒' : ''}
+          <div className="native-header flex-between">
+            <div>
+              <div className="native-title">WAR SAKEEB</div>
+              <div className="native-subtitle">
+                {dateStr}
+                <span style={{color: '#cbd5e1'}}>•</span> 
+                <span className="btn-press" onClick={requestLocation} style={{color: 'var(--salah-primary)', display: 'flex', alignItems: 'center', gap: '4px'}}>
+                  <Icons.Pin /> {locationName}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="main-card">
-            
-            <div 
-              className={`mute-btn ${!isMuted ? 'active-bell' : ''}`} 
-              onClick={() => {
-                const audioEl = document.getElementById('adhan-player');
-                setIsMuted(!isMuted);
-                if (isMuted && audioEl) {
-                  audioEl.play().catch(e=>{});
-                  audioEl.pause();
-                } else if (!isMuted && audioEl) {
-                  audioEl.pause();
-                  audioEl.currentTime = 0;
-                }
-              }}
-            >
+          <div className="clock-widget">
+            <div className="s-mute-btn btn-press" onClick={() => {
+              const el = document.getElementById('adhan-player'); setIsMuted(!isMuted);
+              if (isMuted && el) { el.play().catch(e=>{}); el.pause(); } else if (el) { el.pause(); el.currentTime = 0; }
+            }}>
               {isMuted ? <Icons.BellSlash /> : <Icons.Bell />}
             </div>
 
-            {/* PERFECTLY ALIGNED CLOCK */}
-            <div className="clock-container">
-              <div className="time-numbers">
-                {displayH}:{currentM}:{currentS}
-              </div>
-              <div className="time-ampm">{currentAmPm}</div>
-            </div>
-
-            {/* Next Prayer Pill */}
-            <div className="next-prayer-pill">
-              <div className="live-dot"></div>
-              <span>Next: <strong style={{color: '#0f172a'}}>{nextPrayerName}</strong> in {countdownStr}</span>
-            </div>
-
-            {/* 2x3 Prayer Grid */}
-            <div className="prayer-grid">
-              {GRID_PRAYERS.map((prayer, idx) => {
-                const isActive = activePrayerId === prayer.id;
-                const Icon = isActive ? Icons.ActiveDot : prayer.icon;
-                const timeObj = prayerTimes ? formatTime(prayerTimes[prayer.api]) : {time: '--:--', ampm: ''};
-                const iconClass = (!isActive && (prayer.name === 'Sunrise' || prayer.name === 'Asr')) ? 'prayer-icon orange' : 'prayer-icon';
-
-                return (
-                  <div 
-                    key={prayer.id} 
-                    className={`prayer-card ${isActive ? 'active' : ''}`}
-                    style={{ animationDelay: `${0.3 + (idx * 0.08)}s` }}
-                  >
-                    <div className="card-header">
-                      <span className={iconClass}><Icon /></span>
-                      <span className="prayer-name">{prayer.name}</span>
-                      {prayer.badge && <span className={`badge ${prayer.badgeClass}`}>{prayer.badge}</span>}
-                    </div>
-                    <div className="prayer-time">
-                      {timeObj.time} <span className="prayer-ampm">{timeObj.ampm}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Tahajjud Full Width Row at Bottom */}
-            <div className={`tahajjud-row ${activePrayerId === 'Tahajjud' ? 'active' : ''}`} style={{animationDelay: '0.8s'}}>
-              <div className="tahajjud-left">
-                <span className="prayer-icon"><Icons.Moon /></span>
-                <span className="prayer-name">Tahajjud</span>
-                <span className="badge badge-last3rd">LAST 3RD</span>
-              </div>
-              <div className="prayer-time">
-                {prayerTimes ? formatTime(prayerTimes.Lastthird || prayerTimes.Midnight).time : '--:--'} 
-                <span className="prayer-ampm">AM</span>
-              </div>
-            </div>
-
+            <div className="clock-time">{cH % 12 || 12}:{cM}<span className="clock-sec">:{cS}</span> <span className="clock-ampm">{cH >= 12 ? 'PM' : 'AM'}</span></div>
+            <div className="pill-next"><div className="pill-dot"></div>Next: <strong>{nextName}</strong> in {countdownStr}</div>
           </div>
+
+          <div className="s-grid">
+            {GRID_PRAYERS.map((p, i) => {
+              const act = activeId === p.id;
+              const Icon = act ? Icons.ActiveDot : p.icon;
+              const t = formatTime(prayerTimes[p.api]);
+              return (
+                <div key={p.id} className={`s-card btn-press ${act ? 'active' : ''}`} style={{animationDelay: `${0.1 + (i*0.05)}s`}}>
+                  <div className="s-card-head">
+                    <span className={`s-icon ${(!act && (p.name==='Sunrise'||p.name==='Asr'))?'orange':''}`}><Icon /></span>
+                    <span className="s-name">{p.name}</span>
+                    {p.badge && <span className={`badge ${p.badgeClass}`}>{p.badge}</span>}
+                  </div>
+                  <div className="s-ptime">{t.time} <span className="s-pampm">{t.ampm}</span></div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className={`s-tahajjud btn-press ${activeId === 'Tahajjud' ? 'active' : ''}`} style={{animationDelay: '0.4s'}}>
+            <div className="t-left"><span className="s-icon"><Icons.Moon /></span><span className="s-name">Tahajjud</span><span className="badge bg-last3">LAST 3RD</span></div>
+            <div className="s-ptime">{formatTime(prayerTimes.Lastthird || prayerTimes.Midnight).time} <span className="s-pampm">AM</span></div>
+          </div>
+
+        </div>
+      );
+    }
+
+    // ==========================================
+    // MODULE 2: QURAN READER (NATIVE UI)
+    // ==========================================
+    const VAULT_NAME = 'quran-master-vault-v2';
+
+    function QuranReader({ setHideNav }) {
+      const [view, setView] = useState('home');
+      const [surahs, setSurahs] = useState([]);
+      const [searchQuery, setSearchQuery] = useState('');
+      const [currentSurah, setCurrentSurah] = useState(null);
+      const [surahData, setSurahData] = useState(null);
+      const [syncState, setSyncState] = useState('checking');
+
+      useEffect(() => { checkOfflineStatus(); }, []);
+      useEffect(() => { setHideNav(view === 'surah'); }, [view, setHideNav]);
+
+      const checkOfflineStatus = async () => {
+        try {
+          const cache = await caches.open(VAULT_NAME);
+          const hasMeta = await cache.match('https://api.alquran.cloud/v1/surah');
+          if (hasMeta) {
+            const res = await hasMeta.json();
+            setSurahs(res.data); setSyncState('synced');
+          } else {
+            setSyncState('needed');
+            if (navigator.onLine) {
+                const res = await fetch('https://api.alquran.cloud/v1/surah');
+                const data = await res.json(); setSurahs(data.data);
+            }
+          }
+        } catch(e) { setSyncState('needed'); }
+      };
+
+      const downloadFullDatabase = async () => {
+        if (!navigator.onLine) return alert("Please turn on internet to download.");
+        setSyncState('syncing');
+        try {
+          const cache = await caches.open(VAULT_NAME);
+          await cache.add('https://api.alquran.cloud/v1/surah');
+          await cache.add('https://api.alquran.cloud/v1/quran/quran-uthmani');
+          await cache.add('https://api.alquran.cloud/v1/quran/en.sahih');
+          const metaRes = await cache.match('https://api.alquran.cloud/v1/surah');
+          const metaData = await metaRes.json();
+          setSurahs(metaData.data); setSyncState('synced');
+        } catch (e) { alert("Download failed."); setSyncState('needed'); }
+      };
+
+      const openSurah = async (sInfo) => {
+        setView('surah'); setCurrentSurah(sInfo); setSurahData(null); window.scrollTo(0, 0);
+        try {
+          const cache = await caches.open(VAULT_NAME);
+          const arCache = await cache.match('https://api.alquran.cloud/v1/quran/quran-uthmani');
+          const enCache = await cache.match('https://api.alquran.cloud/v1/quran/en.sahih');
+
+          if (arCache && enCache) {
+             const arData = await arCache.json(); const enData = await enCache.json();
+             const aS = arData.data.surahs.find(s => s.number === sInfo.number);
+             const eS = enData.data.surahs.find(s => s.number === sInfo.number);
+             setSurahData(aS.ayahs.map((a, i) => ({ num: a.numberInSurah, ar: a.text.replace("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ", ""), en: eS.ayahs[i].text })));
+          } else {
+             if (!navigator.onLine) return alert("You are offline. Download the database first.");
+             const [arN, enN] = await Promise.all([fetch(`https://api.alquran.cloud/v1/surah/${sInfo.number}/quran-uthmani`), fetch(`https://api.alquran.cloud/v1/surah/${sInfo.number}/en.sahih`)]);
+             const aD = await arN.json(); const eD = await enN.json();
+             setSurahData(aD.data.ayahs.map((a, i) => ({ num: a.numberInSurah, ar: a.text.replace("بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ ", ""), en: eD.data.ayahs[i].text })));
+          }
+        } catch (e) { setView('home'); }
+      };
+
+      const filteredSurahs = useMemo(() => surahs.filter(s => s.englishName.toLowerCase().includes(searchQuery.toLowerCase())), [surahs, searchQuery]);
+
+      return (
+        <div className="native-container">
+          {view === 'home' && (
+            <div>
+              <div className="native-header">
+                <div className="native-title" style={{color: 'var(--quran-primary)'}}>Al-Quran</div>
+                <div className="native-subtitle">Read Offline Anywhere</div>
+              </div>
+
+              {syncState === 'needed' && <button className="sync-btn btn-press" onClick={downloadFullDatabase}><Icons.Download /> Install Offline Database</button>}
+              {syncState === 'syncing' && <button className="sync-btn"><div className="spinner"></div> Saving...</button>}
+
+              <div className="q-search">
+                <Icons.Search />
+                <input type="text" className="q-input" placeholder="Search Surahs..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+              </div>
+
+              <div className="q-list">
+                {filteredSurahs.map((s, idx) => (
+                  <div key={s.number} className="q-list-item btn-press" onClick={() => openSurah(s)} style={{animationDelay: `${Math.min(idx*0.05, 0.5)}s`}}>
+                    <div className="q-list-left">
+                      <div className="q-num">{s.number}</div>
+                      <div><div className="q-name-en">{s.englishName}</div><div className="q-meta">{s.numberOfAyahs} Verses</div></div>
+                    </div>
+                    <div className="q-name-ar font-arabic">{s.name.replace('سُورَةُ ', '')}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {view === 'surah' && currentSurah && (
+            <div className="reader-view">
+              <div className="reader-head">
+                <button className="back-btn btn-press" onClick={() => setView('home')}><Icons.ChevronLeft /> Back</button>
+                <div style={{textAlign: 'right'}}><div style={{fontSize: '18px', fontWeight: '800', color: 'var(--text-main)'}}>{currentSurah.englishName}</div><div className="font-arabic" style={{fontSize: '22px', color: 'var(--quran-primary)'}}>{currentSurah.name.replace('سُورَةُ ', '')}</div></div>
+              </div>
+
+              {!surahData ? <div className="loader-screen"><div className="spinner" style={{borderColor: '#d1fae5', borderTopColor: '#059669'}}></div></div> : (
+                <div>
+                  {currentSurah.number !== 1 && currentSurah.number !== 9 && <div className="bismillah font-arabic">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>}
+                  {surahData.map(a => (
+                    <div key={a.num} className="ayah-card">
+                      <div className="ayah-ar font-arabic">{a.ar}</div>
+                      <div className="ayah-num">{a.num}</div>
+                      <div className="ayah-en">{a.en}</div>
+                    </div>
+                  ))}
+                  <div style={{textAlign: 'center', padding: '40px', fontWeight: '800', color: '#cbd5e1', fontSize: '12px', letterSpacing: '3px'}}>END OF SURAH</div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ==========================================
+    // MAIN APP ROUTER (THE SUPER APP)
+    // ==========================================
+    function App() {
+      const [activeTab, setActiveTab] = useState('salah'); 
+      const [hideNav, setHideNav] = useState(false);
+
+      return (
+        <div className={`app-root ${activeTab}-theme`}>
+          
+          {activeTab === 'salah' ? <SalahTracker /> : <QuranReader setHideNav={setHideNav} />}
+
+          <div className={`bottom-nav ${hideNav ? 'hidden' : ''}`}>
+            <div className={`nav-item btn-press ${activeTab === 'salah' ? 'active salah' : ''}`} onClick={() => { setActiveTab('salah'); window.scrollTo(0,0); }}>
+              <Icons.Mosque /> PRAYERS
+            </div>
+            <div className={`nav-item btn-press ${activeTab === 'quran' ? 'active quran' : ''}`} onClick={() => { setActiveTab('quran'); window.scrollTo(0,0); }}>
+              <Icons.Book /> QURAN
+            </div>
+          </div>
+
         </div>
       );
     }
