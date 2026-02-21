@@ -322,6 +322,10 @@
   </style>
 </head>
 <body>
+
+  <!-- Hidden Audio Player forces immediate download and offline caching -->
+  <audio id="adhan-player" src="./Adhan.mp3" preload="auto" style="display:none;"></audio>
+
   <div id="root"></div>
 
   <script>
@@ -358,23 +362,18 @@
       const [isOffline, setIsOffline] = useState(!navigator.onLine);
       const [isMuted, setIsMuted] = useState(true);
 
-      // Adhan Audio Engine Refs
-      const adhanAudio = useRef(null);
       const lastPlayedPrayer = useRef(null);
-
-      useEffect(() => {
-        // Initialize the audio file
-        adhanAudio.current = new Audio('./Adhan.mp3');
-      }, []);
 
       // Smooth 90fps clock tick & Adhan Logic
       useEffect(() => {
+        const audioEl = document.getElementById('adhan-player');
         let animationFrameId;
+        
         const tick = () => {
           const now = new Date();
           setCurrentTime(now);
           
-          if (prayerTimes && !isMuted) {
+          if (prayerTimes && !isMuted && audioEl) {
             const current24Str = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
             const adhanPrayers = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
             
@@ -384,9 +383,8 @@
             });
 
             if (activeAdhanPrayer && lastPlayedPrayer.current !== activeAdhanPrayer) {
-                // Time matches, play adhan once
-                adhanAudio.current.currentTime = 0;
-                adhanAudio.current.play().catch(e => console.log("Audio blocked by browser policy"));
+                audioEl.currentTime = 0;
+                audioEl.play().catch(e => console.log("Audio blocked by browser. User must interact first."));
                 lastPlayedPrayer.current = activeAdhanPrayer;
             } else if (!activeAdhanPrayer) {
                 lastPlayedPrayer.current = null;
@@ -401,7 +399,7 @@
 
       // Init and network tracking
       useEffect(() => {
-        const savedLoc = localStorage.getItem('salah_city_v7');
+        const savedLoc = localStorage.getItem('salah_city_v6');
         if (savedLoc) setLocationName(savedLoc);
         initData();
         
@@ -410,52 +408,29 @@
       }, []);
 
       const initData = async () => {
-        let coordsStr = localStorage.getItem('salah_coords_v7');
+        let coordsStr = localStorage.getItem('salah_coords_v6');
         if (!coordsStr) {
            coordsStr = JSON.stringify({lat: 28.6139, lng: 77.2090});
-           localStorage.setItem('salah_coords_v7', coordsStr);
+           localStorage.setItem('salah_coords_v6', coordsStr);
         }
         await loadTimesForDate(new Date(), JSON.parse(coordsStr));
       };
 
-      // --- THE NEW, RELIABLE LOCATION ENGINE ---
       const requestLocation = () => {
-        if (!navigator.geolocation) {
-          alert("Geolocation is not supported by your browser");
-          return;
-        }
-        
+        if (!navigator.geolocation) return alert("Geolocation not supported");
         setLocationName("Locating...");
-        
-        navigator.geolocation.getCurrentPosition(
-          async (pos) => {
-            const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-            localStorage.setItem('salah_coords_v7', JSON.stringify(coords));
-            
-            // Using a much more reliable mobile-friendly API for Reverse Geocoding
-            try {
-              const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coords.lat}&longitude=${coords.lng}&localityLanguage=en`);
-              const data = await res.json();
-              const city = data.city || data.locality || data.principalSubdivision || "My Location";
-              setLocationName(city);
-              localStorage.setItem('salah_city_v7', city);
-            } catch(e) { 
-              setLocationName("Location Saved"); 
-            }
-            
-            await loadTimesForDate(new Date(), coords);
-          }, 
-          (error) => {
-            console.error("Location error:", error);
-            if (error.code === error.PERMISSION_DENIED) {
-              setLocationName("Permission Denied");
-              alert("Please allow location access in your browser to get accurate times.");
-            } else {
-              setLocationName("Location Error");
-            }
-          },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const coords = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          localStorage.setItem('salah_coords_v6', JSON.stringify(coords));
+          try {
+            const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${coords.lat}&longitude=${coords.lng}&localityLanguage=en`);
+            const data = await res.json();
+            const city = data.city || data.locality || "My Location";
+            setLocationName(city);
+            localStorage.setItem('salah_city_v6', city);
+          } catch(e) { setLocationName("Location Saved"); }
+          await loadTimesForDate(new Date(), coords);
+        }, () => setLocationName("Location Denied"));
       };
 
       const loadTimesForDate = async (date, coords) => {
@@ -502,7 +477,7 @@
         return d;
       };
 
-      // Next Prayer Engine
+      // Math for Next Prayer
       let nextPrayerName = "Loading...";
       let countdownStr = "00:00:00";
       let activePrayerId = null;
@@ -573,11 +548,16 @@
             <div 
               className={`mute-btn ${!isMuted ? 'active-bell' : ''}`} 
               onClick={() => {
+                const audioEl = document.getElementById('adhan-player');
                 setIsMuted(!isMuted);
-                // Trick to unlock audio on mobile: play and immediately pause
-                if (isMuted && adhanAudio.current) {
-                  adhanAudio.current.play().catch(e=>{});
-                  adhanAudio.current.pause();
+                
+                // Mute logic: If turning sound ON, we must "unlock" the audio by playing an empty frame
+                if (isMuted && audioEl) {
+                  audioEl.play().catch(e=>{});
+                  audioEl.pause();
+                } else if (!isMuted && audioEl) {
+                  audioEl.pause();
+                  audioEl.currentTime = 0;
                 }
               }}
             >
