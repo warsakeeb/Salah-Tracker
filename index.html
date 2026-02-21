@@ -323,7 +323,7 @@
 </head>
 <body>
 
-  <!-- Hidden Audio Player forces immediate download and offline caching -->
+  <!-- Hidden Audio Player -->
   <audio id="adhan-player" src="./Adhan.mp3" preload="auto" style="display:none;"></audio>
 
   <div id="root"></div>
@@ -361,8 +361,25 @@
       const [locationName, setLocationName] = useState('Fetching Location...');
       const [isOffline, setIsOffline] = useState(!navigator.onLine);
       const [isMuted, setIsMuted] = useState(true);
+      const [storageLocked, setStorageLocked] = useState(false); // NEW: The Titanium Lock Status
 
       const lastPlayedPrayer = useRef(null);
+
+      // --- THE TITANIUM VAULT LOCK ---
+      // This forces Android to stop deleting the data
+      useEffect(() => {
+        async function lockStorage() {
+          if (navigator.storage && navigator.storage.persist) {
+            let persisted = await navigator.storage.persisted();
+            if (!persisted) {
+              persisted = await navigator.storage.persist();
+            }
+            setStorageLocked(persisted);
+            console.log(persisted ? "OS Locked: Data is permanent." : "OS refused lock.");
+          }
+        }
+        lockStorage();
+      }, []);
 
       // Smooth 90fps clock tick & Adhan Logic
       useEffect(() => {
@@ -384,7 +401,7 @@
 
             if (activeAdhanPrayer && lastPlayedPrayer.current !== activeAdhanPrayer) {
                 audioEl.currentTime = 0;
-                audioEl.play().catch(e => console.log("Audio blocked by browser. User must interact first."));
+                audioEl.play().catch(e => console.log("Audio blocked by browser."));
                 lastPlayedPrayer.current = activeAdhanPrayer;
             } else if (!activeAdhanPrayer) {
                 lastPlayedPrayer.current = null;
@@ -537,9 +554,13 @@
           <div className="header-section">
             <div className="brand-title">WAR SAKEEB</div>
             <div className="date-text">{fullDateStr}</div>
+            
+            {/* Location Status now includes the Titanium Lock icon 🔒 if safe */}
             <div className="location-status" onClick={requestLocation}>
               <span style={{color: '#ef4444'}}><Icons.Pin /></span>
-              {locationName} {isOffline ? '(Offline)' : ''}
+              {locationName} 
+              {isOffline ? ' (Offline)' : ''} 
+              {storageLocked ? ' 🔒' : ''}
             </div>
           </div>
 
@@ -550,8 +571,6 @@
               onClick={() => {
                 const audioEl = document.getElementById('adhan-player');
                 setIsMuted(!isMuted);
-                
-                // Mute logic: If turning sound ON, we must "unlock" the audio by playing an empty frame
                 if (isMuted && audioEl) {
                   audioEl.play().catch(e=>{});
                   audioEl.pause();
