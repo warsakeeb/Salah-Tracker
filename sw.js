@@ -1,62 +1,63 @@
-const CACHE_NAME = 'app-permanent-vault-v10';
+const CACHE_NAME = 'salat-titanium-vault-v11';
 
-// These are the core React scripts that MUST be locked in permanently
+// Core files needed to open the app offline
 const CORE_ASSETS = [
   './',
   './index.html',
   './manifest.json',
+  './Adhan.mp3',
   'https://unpkg.com/react@18/umd/react.production.min.js',
   'https://unpkg.com/react-dom@18/umd/react-dom.production.min.js',
-  'https://unpkg.com/@babel/standalone/babel.min.js'
+  'https://unpkg.com/@babel/standalone/babel.min.js',
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap'
 ];
 
-// 1. INSTALL PHASE: Lock the core files in immediately
 self.addEventListener('install', (e) => {
   self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(CORE_ASSETS);
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // Safe loop: Downloads files one by one. If one fails, it doesn't break the whole app!
+      for (let asset of CORE_ASSETS) {
+        try {
+          await cache.add(asset);
+        } catch (error) {
+          console.warn('Could not cache asset:', asset, error);
+        }
+      }
     })
   );
 });
 
-// 2. ACTIVATE PHASE: Clean up any old, corrupted caches
 self.addEventListener('activate', (e) => {
   e.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
-        })
-      );
+    caches.keys().then((keyList) => {
+      return Promise.all(keyList.map((key) => {
+        if (key !== CACHE_NAME) {
+          return caches.delete(key);
+        }
+      }));
     })
   );
   return self.clients.claim();
 });
 
-// 3. THE MAGIC FIX: "Stale-While-Revalidate"
 self.addEventListener('fetch', (e) => {
-  // Only intercept normal GET requests
-  if (e.request.method !== 'GET') return;
+  if (!e.request.url.startsWith('http')) return;
 
+  // Do not cache live API requests here. The React App handles that.
+  if (e.request.url.includes('api.aladhan.com') || e.request.url.includes('bigdatacloud')) {
+     return;
+  }
+
+  // Network First, Cache Fallback strategy
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      
-      // Background Network Fetch
-      const fetchPromise = fetch(e.request).then((networkResponse) => {
-        // If the internet is ON, fetch the newest version and update the permanent vault
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(e.request, networkResponse.clone());
-        });
+    fetch(e.request).then((networkResponse) => {
+      return caches.open(CACHE_NAME).then((cache) => {
+        cache.put(e.request, networkResponse.clone());
         return networkResponse;
-      }).catch(() => {
-        // If the internet is OFF, ignore the error silently
       });
-
-      // INSTANT OFFLINE LOAD: 
-      // If we have it in the permanent vault, return it instantly.
-      // If not, wait for the network.
-      return cachedResponse || fetchPromise;
+    }).catch(() => {
+      return caches.match(e.request);
     })
   );
 });
